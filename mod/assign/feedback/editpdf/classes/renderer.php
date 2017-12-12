@@ -86,7 +86,12 @@ class assignfeedback_editpdf_renderer extends plugin_renderer_base {
         $iconalt = get_string('toolbarbutton', 'assignfeedback_editpdf', $alttext);
 
         $iconhtml = $this->image_icon($icon, $iconalt, 'assignfeedback_editpdf');
-        $iconparams = array('data-tool'=>$tool, 'class'=>$tool . 'button');
+        $iconparams = array(
+            'data-tool' => $tool,
+            'class' => $tool . 'button',
+            'alt' => $alttext->shortcut,
+            'title' => $alttext->shortcut
+        );
         if ($disabled) {
             $iconparams['disabled'] = 'true';
         }
