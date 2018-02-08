@@ -1928,3 +1928,30 @@ function mod_assign_core_calendar_event_action_shows_item_count(calendar_event $
     // For mod_assign, item count should be shown if the event type is 'gradingdue' and there is one or more item count.
     return in_array($event->eventtype, $eventtypesshowingitemcount) && $itemcount > 0;
 }
+
+/**
+ * Callback function 'get_excluded_context_ids_for_course()' that returns an array of contextid values of assignments
+ * for the specified course to excluse in event log reports and loglive reports.
+ *
+ * This callback specifically returns the context id(s) of blind marking assignments that have not been revealed yet.
+ *
+ * @param   int $courseid The course ID.
+ * @return  array
+ */
+function mod_assign_get_excluded_context_ids_for_course($courseid) {
+    global $DB;
+    $contextids = array();
+
+    // Define WHERE clause condition.
+    $select = "course = ? AND blindmarking = 1 AND revealidentities = 0";
+    $params[] = $courseid;
+    $dbassigns = $DB->get_records_select('assign', $select, $params, '', 'id');
+
+    foreach ($dbassigns as $dbassign) {
+        $cm = get_coursemodule_from_instance('assign', $dbassign->id, $courseid);
+        $context = context_module::instance($cm->id);
+        $contextids[] = $context->id;
+    }
+
+    return $contextids;
+}
