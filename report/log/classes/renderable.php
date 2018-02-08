@@ -93,11 +93,14 @@ class report_log_renderable implements renderable {
     /** @var table_log table log which will be used for rendering logs */
     public $tablelog;
 
+    /** @var bool showall to reveal filtered log records */
+    public $showall;
+
     /**
      * Constructor.
      *
      * @param string $logreader (optional)reader pluginname from which logs will be fetched.
-     * @param stdClass|int $course (optional) course record or id
+     * @param stdClass|int $course (optional) course record or id.
      * @param int $userid (optional) id of user to filter records for.
      * @param int|string $modid (optional) module id or site_errors for filtering errors.
      * @param string $action (optional) action name to filter.
@@ -112,11 +115,12 @@ class report_log_renderable implements renderable {
      * @param string $logformat log format.
      * @param int $page (optional) page number.
      * @param int $perpage (optional) number of records to show per page.
-     * @param string $order (optional) sortorder of fetched records
+     * @param string $order (optional) sortorder of fetched records.
+     * @param bool $showall (optional) reveal filtered log records.
      */
     public function __construct($logreader = "", $course = 0, $userid = 0, $modid = 0, $action = "", $groupid = 0, $edulevel = -1,
             $showcourses = false, $showusers = false, $showreport = true, $showselectorform = true, $url = "", $date = 0,
-            $logformat='showashtml', $page = 0, $perpage = 100, $order = "timecreated ASC", $origin ='') {
+            $logformat = 'showashtml', $page = 0, $perpage = 100, $order = "timecreated ASC", $origin = '', $showall = 0) {
 
         global $PAGE;
 
@@ -161,6 +165,7 @@ class report_log_renderable implements renderable {
         $this->showselectorform = $showselectorform;
         $this->logformat = $logformat;
         $this->origin = $origin;
+        $this->showall = $showall;
     }
 
     /**
@@ -490,6 +495,7 @@ class report_log_renderable implements renderable {
         $filter->date = $this->date;
         $filter->orderby = $this->order;
         $filter->origin = $this->origin;
+        $filter->showall = $this->showall;
         // If showing site_errors.
         if ('site_errors' === $this->modid) {
             $filter->siteerrors = true;

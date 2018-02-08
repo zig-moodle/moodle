@@ -40,7 +40,7 @@ $showcourses = optional_param('showcourses', false, PARAM_BOOL); // Whether to s
 $showusers   = optional_param('showusers', false, PARAM_BOOL); // Whether to show users if we're over our limit.
 $chooselog   = optional_param('chooselog', false, PARAM_BOOL);
 $logformat   = optional_param('download', '', PARAM_ALPHA);
-$logreader      = optional_param('logreader', '', PARAM_COMPONENT); // Reader which will be used for displaying logs.
+$logreader   = optional_param('logreader', '', PARAM_COMPONENT); // Reader which will be used for displaying logs.
 $edulevel    = optional_param('edulevel', -1, PARAM_INT); // Educational level.
 $origin      = optional_param('origin', '', PARAM_TEXT); // Event origin.
 
@@ -149,8 +149,11 @@ if (empty($course) || ($course->id == $SITE->id)) {
     $PAGE->set_heading($course->fullname);
 }
 
-$reportlog = new report_log_renderable($logreader, $course, $user, $modid, $modaction, $group, $edulevel, $showcourses, $showusers,
-        $chooselog, true, $url, $date, $logformat, $page, $perpage, 'timecreated DESC', $origin);
+// Check if admin user to show all log events records.
+$showall = (is_siteadmin()) ? true : false;
+
+$reportlog = new report_log_renderable($logreader, $course, $user, $modid, $modaction, $group, $edulevel, $showcourses,
+        $showusers, $chooselog, true, $url, $date, $logformat, $page, $perpage, 'timecreated DESC', $origin, $showall);
 $readers = $reportlog->get_readers();
 $output = $PAGE->get_renderer('report_log');
 
