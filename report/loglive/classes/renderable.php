@@ -70,6 +70,9 @@ class report_loglive_renderable implements renderable {
     /** @var  int refresh rate in seconds */
     protected $refresh  = 60;
 
+    /** @var bool showall to reveal filtered loglive records */
+    public $showall;
+
     /**
      * Constructor.
      *
@@ -79,10 +82,11 @@ class report_loglive_renderable implements renderable {
      * @param int $date date (optional) from which records will be fetched.
      * @param int $page (optional) page number.
      * @param int $perpage (optional) number of records to show per page.
-     * @param string $order (optional) sortorder of fetched records
+     * @param string $order (optional) sortorder of fetched records.
+     * @param bool $showall (optional) reveal filtered loglive records.
      */
     public function __construct($logreader = "", $course = 0, $url = "", $date = 0, $page = 0, $perpage = 100,
-                                $order = "timecreated DESC") {
+                                $order = "timecreated DESC", $showall = 0) {
 
         global $PAGE;
 
@@ -121,6 +125,7 @@ class report_loglive_renderable implements renderable {
         $this->perpage = $perpage;
         $this->order = $order;
         $this->set_refresh_rate();
+        $this->showall = $showall;
     }
 
     /**
@@ -181,6 +186,7 @@ class report_loglive_renderable implements renderable {
         $filter->date = $this->date;
         $filter->orderby = $this->order;
         $filter->anonymous = 0;
+        $filter->showall = $this->showall;
 
         return $filter;
     }

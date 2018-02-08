@@ -304,6 +304,7 @@ class report_loglive_table_log extends table_sql {
      * @param bool $useinitialsbar do you want to use the initials bar.
      */
     public function query_db($pagesize, $useinitialsbar = true) {
+        global $DB;
 
         $joins = array();
         $params = array();
@@ -312,6 +313,16 @@ class report_loglive_table_log extends table_sql {
         if (!empty($this->filterparams->courseid)) {
             $joins[] = "courseid = :courseid";
             $params['courseid'] = $this->filterparams->courseid;
+
+            if ($this->filterparams->showall == false) {
+                // Get course contexts that need to be filtered from loglive reporting.
+                $contextids = $this->get_course_context_ids_for_exclusion($this->filterparams->courseid);
+                if (count($contextids) > 0) {
+                    list($notinsql, $notinparams) = $DB->get_in_or_equal($contextids, SQL_PARAMS_NAMED, '', false);
+                    $joins[] = "( contextid $notinsql )";
+                    $params = array_merge($params, $notinparams);
+                }
+            }
         }
 
         if (!empty($this->filterparams->date)) {
@@ -401,5 +412,27 @@ class report_loglive_table_log extends table_sql {
                         array('context' => $context)));
             }
         }
+    }
+
+    /**
+     * Helper function to create a list of context ids from plugins that support 'get_excluded_context_ids_for_course()'
+     * callback for exclusion in the event loglive report.
+     *
+     * @param   int $courseid The course ID.
+     * @return  array of context id values.
+     */
+    protected function get_course_context_ids_for_exclusion($courseid) {
+        $contextids = array();
+
+        // Get the $plugincontextids from each plugin's callback and add them to $contextids.
+        $pluginswithfunction = get_plugins_with_function("get_excluded_context_ids_for_course", "lib.php");
+        foreach ($pluginswithfunction as $plugintype => $plugins) {
+            foreach ($plugins as $pluginfunction) {
+                $plugincontextids = $pluginfunction($courseid);
+                $contextids = array_merge($contextids, $plugincontextids);
+            }
+        }
+
+        return $contextids;
     }
 }

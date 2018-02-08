@@ -48,6 +48,10 @@ require_capability('report/loglive:view', $context);
 if (!$since) {
     echo $since = $since - report_loglive_renderable::CUTOFF;
 }
-$renderable = new report_loglive_renderable($logreader, $id, '', $since, $page);
+
+// Check if admin user to reveal all event logs (reveal filtered logs).
+$showall = (is_siteadmin()) ? true : false;
+
+$renderable = new report_loglive_renderable($logreader, $id, '', $since, $page, 100, "timecreated DESC", $showall);
 $output = $PAGE->get_renderer('report_loglive');
 echo $output->render($renderable);

@@ -59,7 +59,10 @@ $url = new moodle_url("/report/loglive/index.php", $params);
 $PAGE->set_url($url);
 $PAGE->set_pagelayout('report');
 
-$renderable = new report_loglive_renderable($logreader, $id, $url, 0, $page);
+// Check if admin user to show all loglive event records.
+$showall = (is_siteadmin()) ? true : false;
+
+$renderable = new report_loglive_renderable($logreader, $id, $url, 0, $page, 100, "timecreated DESC", $showall);
 $refresh = $renderable->get_refresh_rate();
 $logreader = $renderable->selectedlogreader;
 
