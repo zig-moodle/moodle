@@ -24,6 +24,7 @@
 
 namespace mod_forum\privacy;
 
+use \core_privacy\request\approved_contextlist;
 use \core_privacy\request\writer;
 
 defined('MOODLE_INTERNAL') || die();
@@ -57,7 +58,7 @@ class provider implements
         $sql = "SELECT c.id
                   FROM {context} c
             INNER JOIN {course_modules} cm ON cm.id = c.instanceid AND c.contextlevel = :contextlevel
-            INNER JOIN {modules} mod ON mod.id = cm.module AND mod.name = 'forum'
+            INNER JOIN {modules} m ON m.id = cm.module AND m.name = 'forum'
             INNER JOIN {forum} f ON f.id = cm.instance
             INNER JOIN {forum_discussions} d ON d.forum = f.id
              LEFT JOIN {forum_posts} p ON p.discussion = d.id
@@ -109,16 +110,14 @@ class provider implements
     /**
      * @inheritdoc
      */
-    public static function store_user_data(int $userid, array $contexts) {
+    public static function store_user_data(int $userid, approved_contextlist $contexts) {
         global $DB;
 
-        if (empty($contexts)) {
+        $contextids = $contexts->get_contextids();
+
+        if (empty($contextids)) {
             return;
         }
-
-        $contextids = array_map(function($context) {
-            return $context->id;
-        }, $contexts);
 
         list($contextsql, $contextparams) = $DB->get_in_or_equal($contextids, SQL_PARAMS_NAMED);
 
@@ -232,17 +231,17 @@ class provider implements
                     p.*,
                     d.name AS discussionname,
                     d.timemodified AS discussionmodified,
-                    read.firstread,
-                    read.lastread
+                    fr.firstread,
+                    fr.lastread
                   FROM {forum} f
             INNER JOIN {forum_discussions} d ON d.forum = f.id
             INNER JOIN {forum_posts} p ON p.discussion = d.id
-             LEFT JOIN {forum_read} read ON read.postid = p.id
+             LEFT JOIN {forum_read} fr ON fr.postid = p.id
             {$ratingjoin}
                  WHERE f.id ${foruminsql} AND
                 (
                     p.userid = :postuserid OR
-                    read.userid = :readuserid OR
+                    fr.userid = :readuserid OR
                     {$ratinguserwhere}
                 )
         ";
@@ -280,6 +279,9 @@ class provider implements
 
                 // Store all ratings against this post as the post belongs to the user. All ratings on it are ratings of their content.
                 \core_rating\privacy\provider::store_area_ratings($userid, $context, $postarea, 'mod_forum', 'post', $post->id, false);
+
+                // Store all tags against this post as the tag belongs to the user.
+                \core_tag\privacy\provider::store_item_tags($userid, $context, $postarea, 'mod_forum', 'forum_posts', $post->id);
             }
 
             // Check for any ratings that the user has made on this post.
