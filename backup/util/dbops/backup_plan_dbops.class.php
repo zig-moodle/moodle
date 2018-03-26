@@ -251,8 +251,18 @@ abstract class backup_plan_dbops extends backup_dbops {
             $info = '-an';
         }
 
-        return $backupword . '-' . $format . '-' . $type . '-' .
-               $name . '-' . $date . $info . '.mbz';
+        $prefix = $backupword . '-' . $format . '-' . $type . '-';    // Prefix is not to be truncated.
+        $postfix = '-' . $date . $info . '.mbz';                      // Postfix is not to be truncated.
+
+        // Check that the prefix + name + postfix is less than MAX_FILENAME_SIZE to avoid further truncation.
+        $filenamelength = strlen($prefix . $name . $postfix);
+
+        // If the test backup filename length is longer than MAX_FILENAME_SIZE, then truncate the name
+        // and add '...' to the end of the name to indicate truncation has occurred.
+        $name = ($filenamelength <= MAX_FILENAME_SIZE) ? $name :
+            (core_text::substr($name, 0, (strlen($name) - ($filenamelength - MAX_FILENAME_SIZE)) - 3) . '...');
+
+        return ($prefix . $name . $postfix);
     }
 
     /**
