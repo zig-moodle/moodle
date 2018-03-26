@@ -184,6 +184,29 @@ class backup_dbops_testcase extends advanced_testcase {
             backup::INTERACTIVE_NO, backup::MODE_SAMESITE, $this->userid);
         $this->assertEquals(backup_controller_dbops::backup_includes_files($bc->get_backupid()), 0);
     }
+
+    /*
+     * test backup_plan_dbops get_default_backup_filename() returned filename is less than MAX_FILENAME_SIZE.
+     */
+    function test_get_default_backup_filename() {
+        global $DB;
+
+        // Instantiate non interactive backup_controller
+        $bc = new mock_backup_controller4dbops(backup::TYPE_1ACTIVITY, $this->moduleid, backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO, backup::MODE_GENERAL, $this->userid);
+        $this->assertTrue($bc instanceof backup_controller);
+
+        $format = $bc->get_format();
+        $type = $bc->get_type();
+        $id = $bc->get_id();
+        $users = $bc->get_plan()->get_setting('users')->get_value();
+        $anonymised = $bc->get_plan()->get_setting('anonymize')->get_value();
+
+        $filename = backup_plan_dbops::get_default_backup_filename($format, $type, $id, $users, $anonymised, false);
+
+        // Test to check the backup filename is within the MAX_FILENAME_SIZE.
+        $this->assertTrue(strlen($filename) <= MAX_FILENAME_SIZE);
+    }
 }
 
 class mock_backup_controller4dbops extends backup_controller {
