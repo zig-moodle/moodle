@@ -114,6 +114,7 @@ class provider implements metadataprovider, pluginprovider, preference_provider 
         $collection->add_plugintype_link('assignsubmission', [],'privacy:metadata:assignsubmissionpluginsummary');
         $collection->add_plugintype_link('assignfeedback', [], 'privacy:metadata:assignfeedbackpluginsummary');
         $collection->add_subsystem_link('core_message', [], 'privacy:metadata:assignmessageexplanation');
+        $collection->add_subsystem_link('core_portfolio', [], 'privacy:metadata:assignportfolioexplanation');
 
         return $collection;
     }

@@ -68,6 +68,8 @@ class provider implements
         // regular basis by cron, or during normal requests. MDL-62006 was raised
         // to discuss and/or implement support for those tables.
 
+        $collection->add_subsystem_link('core_portfolio', [], 'privacy:metadata:portfoliopurpose');
+
         return $collection;
     }
 

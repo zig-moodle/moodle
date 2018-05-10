@@ -434,6 +434,7 @@ $string['potentialsubscribers'] = 'Potential subscribers';
 $string['privacy:digesttypenone'] = 'We do not hold any data relating to a preferred forum digest type for this forum.';
 $string['privacy:digesttypepreference'] = 'You have chosen to receive the following forum digest type: "{$a->type}".';
 $string['privacy:discussionsubscriptionpreference'] = 'You have chosen the following discussion subscription preference for this forum: "{$a->preference}"';
+$string['privacy:metadata:core_portfolio'] = 'The forum makes use of the portfolio subsystem to support the exporting of posts.';
 $string['privacy:metadata:core_tag'] = 'The forum makes use of the tag subsystem to support tagging of posts.';
 $string['privacy:metadata:core_rating'] = 'The forum makes use of the rating subsystem to support the rating of posts.';
 $string['privacy:metadata:forum_digests'] = 'Information about the digest preferences for each forum.';

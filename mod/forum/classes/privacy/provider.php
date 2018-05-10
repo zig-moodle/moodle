@@ -118,8 +118,9 @@ class provider implements
         ], 'privacy:metadata:forum_track_prefs');
 
         // Forum posts can be tagged and rated.
-        $items->link_subsystem('core_tag', 'privacy:metadata:core_tag');
-        $items->link_subsystem('core_rating', 'privacy:metadata:core_rating');
+        $items->add_subsystem_link('core_portfolio', [], 'privacy:metadata:core_portfolio');
+        $items->add_subsystem_link('core_tag', [],'privacy:metadata:core_tag');
+        $items->add_subsystem_link('core_rating', [],'privacy:metadata:core_rating');
 
         // There are several user preferences.
         $items->add_user_preference('maildigest', 'privacy:metadata:preference:maildigest');
