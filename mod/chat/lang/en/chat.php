@@ -119,6 +119,7 @@ $string['privacy:metadata:messages:issystem'] = 'Whether the message is a system
 $string['privacy:metadata:messages:message'] = 'The message';
 $string['privacy:metadata:messages:timestamp'] = 'The time at which the message was sent';
 $string['privacy:metadata:messages:userid'] = 'The user ID of the author of the message';
+$string['privacy:metadata:portfoliopurpose'] = 'Chat sessions can be exported to the portfolio subsystem.';
 $string['refreshroom'] = 'Refresh room';
 $string['refreshuserlist'] = 'Refresh user list';
 $string['removemessages'] = 'Remove all messages';

@@ -262,6 +262,7 @@ $string['privacy:metadata:submissionid'] = 'Identifier of the submission';
 $string['privacy:metadata:submissiontitle'] = 'Title of the submission';
 $string['privacy:metadata:subsystem:corefiles'] = 'Workshop module stores files embedded in / attached to the submission text';
 $string['privacy:metadata:subsystem:coreplagiarism'] = 'Workshop module has inbuilt support for plagiarism prevention systems';
+$string['privacy:metadata:subsystem:coreportfolio'] = 'Workshop module can export files to the portfolio subsystem.';
 $string['privacy:metadata:timeaggregated'] = 'When the aggregated grade was last calculated';
 $string['privacy:metadata:timecreated'] = 'When this record was created in the database';
 $string['privacy:metadata:timemodified'] = 'When this record was last modified in the database';

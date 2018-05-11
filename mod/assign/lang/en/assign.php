@@ -392,6 +392,7 @@ $string['privacy:metadata:assignmentid'] = 'Assignment identifier.';
 $string['privacy:metadata:assignmessageexplanation'] = 'Messages are sent to students through the messaging system.';
 $string['privacy:metadata:assignoverrides'] = 'Stores override information for the assignment';
 $string['privacy:metadata:assignperpage'] = 'Number of assignments shown per page.';
+$string['privacy:metadata:assignportfolioexplanation'] = 'Assignment submissions can be exported to the portfolio subsystem.';
 $string['privacy:metadata:assignquickgrading'] = 'A preference as to whether quick grading is used or not.';
 $string['privacy:metadata:assignsubmissiondetail'] = 'Stores user submission information';
 $string['privacy:metadata:assignsubmissionpluginsummary'] = 'Submission data for the assignment.';

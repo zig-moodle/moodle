@@ -102,7 +102,7 @@ class mod_glossary_privacy_provider_testcase extends \core_privacy\tests\provide
         $collection = new collection('mod_glossary');
         $newcollection = provider::get_metadata($collection);
         $itemcollection = $newcollection->get_collection();
-        $this->assertCount(5, $itemcollection);
+        $this->assertCount(6, $itemcollection);
 
         $table = reset($itemcollection);
         $this->assertEquals('glossary_entries', $table->get_name());

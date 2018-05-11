@@ -311,6 +311,7 @@ $string['privacy:metadata:data_records:timemodified'] = 'Time when record was la
 $string['privacy:metadata:data_records:approved'] = 'Approval status';
 $string['privacy:metadata:datafieldnpluginsummary'] = 'Fields for database activity module';
 $string['privacy:metadata:filepurpose'] = 'File attached to the database record';
+$string['privacy:metadata:portfoliopurpose'] = 'Database activities and entries can be exported to the portfolio subsystem.';
 $string['privacy:metadata:tagpurpose'] = 'Tags on database records';
 $string['privacy:metadata:ratingpurpose'] = 'Ratings on database records';
 $string['radiobutton'] = 'Radio buttons';
