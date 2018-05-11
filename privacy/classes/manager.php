@@ -154,9 +154,14 @@ class manager {
         // Get the metadata, and put into an assoc array indexed by component name.
         $metadata = [];
         foreach ($this->get_component_list() as $component) {
+            $starttime = microtime();
+
             if ($this->component_implements($component, \core_privacy\local\metadata\provider::class)) {
                 $metadata[$component] = $this->get_provider_classname($component)::get_metadata(new collection($component));
             }
+
+            $durationtime = microtime_diff($starttime, microtime());
+            mtrace("Get metadata from '$component': $durationtime seconds");
         }
         return $metadata;
     }
@@ -170,6 +175,8 @@ class manager {
     public function get_contexts_for_userid(int $userid) : contextlist_collection {
         $clcollection = new contextlist_collection($userid);
         foreach ($this->get_component_list() as $component) {
+            $starttime = microtime();
+
             if ($this->component_implements($component, \core_privacy\local\request\core_user_data_provider::class)) {
                 $contextlist = $this->get_provider_classname($component)::get_contexts_for_userid($userid);
             } else {
@@ -186,6 +193,9 @@ class manager {
             if (count($contextlist)) {
                 $clcollection->add_contextlist($contextlist);
             }
+
+            $durationtime = microtime_diff($starttime, microtime());
+            mtrace("Get context ids from '$component' for user ID $userid: $durationtime seconds");
         }
 
         return $clcollection;
@@ -203,7 +213,11 @@ class manager {
      */
     public function export_user_data(contextlist_collection $contextlistcollection) {
         // Export for the various components/contexts.
+        $userid = $contextlistcollection->get_userid();
+
         foreach ($contextlistcollection as $approvedcontextlist) {
+            $starttime = microtime();
+
             if (!$approvedcontextlist instanceof \core_privacy\local\request\approved_contextlist) {
                 throw new \moodle_exception('Contextlist must be an approved_contextlist');
             }
@@ -220,13 +234,21 @@ class manager {
                 // This plugin does not know that it has data - export the shared data it doesn't know about.
                 local\request\helper::export_data_for_null_provider($approvedcontextlist);
             }
+
+            $durationtime = microtime_diff($starttime, microtime());
+            mtrace("Export user data from '$component' for user ID $userid: $durationtime seconds");
         }
 
         // Check each component for non contextlist items too.
         foreach ($this->get_component_list() as $component) {
+            $starttime = microtime();
+
             // Core user preference providers.
             if ($this->component_implements($component, \core_privacy\local\request\user_preference_provider::class)) {
-                $this->get_provider_classname($component)::export_user_preferences($contextlistcollection->get_userid());
+                $this->get_provider_classname($component)::export_user_preferences($userid);
+
+                $durationtime = microtime_diff($starttime, microtime());
+                mtrace("Export user data for non-context list items from '$component' for user ID $userid: $durationtime seconds");
             }
         }
 
@@ -246,21 +268,30 @@ class manager {
      */
     public function delete_data_for_user(contextlist_collection $contextlistcollection) {
         // Delete the data.
+        $userid = $contextlistcollection->get_userid();
+
         foreach ($contextlistcollection as $approvedcontextlist) {
+            $starttime = microtime();
+
             if (!$approvedcontextlist instanceof \core_privacy\local\request\approved_contextlist) {
                 throw new \moodle_exception('Contextlist must be an approved_contextlist');
             }
 
-            if ($this->component_is_core_provider($approvedcontextlist->get_component())) {
+            $component = $approvedcontextlist->get_component();
+
+            if ($this->component_is_core_provider($component)) {
                 if (count($approvedcontextlist)) {
                     // The component knows about data that it has.
                     // Have it delete its own data.
-                    $this->get_provider_classname($approvedcontextlist->get_component())::delete_data_for_user($approvedcontextlist);
+                    $this->get_provider_classname($component)::delete_data_for_user($approvedcontextlist);
                 }
             }
 
             // Delete any shared user data it doesn't know about.
             local\request\helper::delete_data_for_user($approvedcontextlist);
+
+            $durationtime = microtime_diff($starttime, microtime());
+            mtrace("Delete user data from '$component' for user ID $userid: $durationtime seconds");
         }
     }
 
@@ -271,6 +302,8 @@ class manager {
      */
     public function delete_data_for_all_users_in_context(\context $context) {
         foreach ($this->get_component_list() as $component) {
+            $starttime = microtime();
+
             if ($this->component_implements($component, \core_privacy\local\request\core_user_data_provider::class)) {
                 // This component knows about specific data that it owns.
                 // Have it delete all of that user data for the context.
@@ -279,6 +312,9 @@ class manager {
 
             // Delete any shared user data it doesn't know about.
             local\request\helper::delete_data_for_all_users_in_context($component, $context);
+
+            $durationtime = microtime_diff($starttime, microtime());
+            mtrace("Delete all user data from '$component': $durationtime seconds");
         }
     }
 
