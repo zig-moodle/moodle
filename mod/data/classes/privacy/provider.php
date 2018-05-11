@@ -83,10 +83,11 @@ class provider implements
         $collection->add_plugintype_link('datafield', [], 'privacy:metadata:datafieldnpluginsummary');
 
         // Subsystems used.
-        $collection->link_subsystem('core_comment', 'privacy:metadata:commentpurpose');
-        $collection->link_subsystem('core_files', 'privacy:metadata:filepurpose');
-        $collection->link_subsystem('core_tag', 'privacy:metadata:tagpurpose');
-        $collection->link_subsystem('core_rating', 'privacy:metadata:ratingpurpose');
+        $collection->add_subsystem_link('core_comment', [], 'privacy:metadata:commentpurpose');
+        $collection->add_subsystem_link('core_files', [],'privacy:metadata:filepurpose');
+        $collection->add_subsystem_link('core_portfolio', [], 'privacy:metadata:portfoliopurpose');
+        $collection->add_subsystem_link('core_tag', [],'privacy:metadata:tagpurpose');
+        $collection->add_subsystem_link('core_rating', [],'privacy:metadata:ratingpurpose');
 
         return $collection;
     }

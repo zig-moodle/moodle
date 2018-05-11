@@ -62,10 +62,12 @@ class provider implements
             'privacy:metadata:glossary_entries'
         );
 
-        $items->add_subsystem_link('core_files', [], 'privacy:metadata:core_files');
         $items->add_subsystem_link('core_comment', [], 'privacy:metadata:core_comments');
+        $items->add_subsystem_link('core_files', [], 'privacy:metadata:core_files');
+        $items->add_subsystem_link('core_portfolio', [], 'privacy:metadata:core_portfolio');
         $items->add_subsystem_link('core_tag', [], 'privacy:metadata:core_tag');
         $items->add_subsystem_link('core_ratings', [], 'privacy:metadata:core_ratings');
+
         return $items;
     }
 

@@ -155,7 +155,7 @@ class mod_data_privacy_provider_testcase extends \core_privacy\tests\provider_te
         $collection = new collection('mod_data');
         $newcollection = provider::get_metadata($collection);
         $itemcollection = $newcollection->get_collection();
-        $this->assertCount(7, $itemcollection);
+        $this->assertCount(8, $itemcollection);
 
         $table = reset($itemcollection);
         $this->assertEquals('data_records', $table->get_name());

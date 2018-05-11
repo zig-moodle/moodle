@@ -106,6 +106,7 @@ class provider implements
 
         $collection->add_subsystem_link('core_files', [], 'privacy:metadata:subsystem:corefiles');
         $collection->add_subsystem_link('core_plagiarism', [], 'privacy:metadata:subsystem:coreplagiarism');
+        $collection->add_subsystem_link('core_portfolio', [], 'privacy:metadata:subsystem:coreportfolio');
 
         $collection->add_user_preference('workshop_perpage', 'privacy:metadata:preference:perpage');
 
