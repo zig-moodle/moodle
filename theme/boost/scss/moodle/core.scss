@@ -1042,6 +1042,7 @@ $mod-indent-size: 30px;
 }
 
 .resourcecontent audio.mediaplugin_html5audio {
+    height: 25px;
     width: 600px;
 }
 /** Large resource images should avoid hidden overflow **/
@@ -1055,6 +1056,7 @@ $mod-indent-size: 30px;
 }
 
 audio.mediaplugin_html5audio {
+    height: 25px;
     width: 300px;
 }
 /* TinyMCE moodle media preview frame should not have padding */
