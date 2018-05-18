@@ -52,6 +52,8 @@ class core_files_zip_packer_testcase extends advanced_testcase implements file_p
 
         $this->files = array(
             'test.test' => $this->testfile,
+            'test..file.txt' => $this->testfile,
+            'test...file..txt' => $this->testfile,
             'testíček.txt' => $this->testfile,
             'Prüfung.txt' => $this->testfile,
             '测试.txt' => $this->testfile,
@@ -111,18 +113,18 @@ class core_files_zip_packer_testcase extends advanced_testcase implements file_p
         $archive = __DIR__.'/fixtures/test_win8_de.zip';
         $archivefiles = $packer->list_files($archive);
         $this->assertTrue(is_array($archivefiles), "Archive not extracted properly: ".basename($archive).' ');
-        $this->assertEquals(2, count($archivefiles));
+        $this->assertEquals(4, count($archivefiles));
         foreach ($archivefiles as $file) {
-            $this->assertTrue($file->pathname === 'Prüfung.txt' or $file->pathname === 'test.test');
+            $this->assertArrayHasKey($file->pathname, $this->files);
         }
 
         $zip_archive = new zip_archive();
         $zip_archive->open(__DIR__.'/fixtures/test_win8_cz.zip', file_archive::OPEN, 'cp852');
         $archivefiles = $zip_archive->list_files();
         $this->assertTrue(is_array($archivefiles), "Archive not extracted properly: ".basename($archive).' ');
-        $this->assertEquals(3, count($archivefiles));
+        $this->assertEquals(5, count($archivefiles));
         foreach ($archivefiles as $file) {
-            $this->assertTrue($file->pathname === 'Žluťoučký/Koníček.txt' or $file->pathname === 'testíček.txt' or $file->pathname === 'test.test');
+            $this->assertArrayHasKey($file->pathname, $this->files);
         }
         $zip_archive->close();
 
@@ -558,6 +560,8 @@ class core_files_zip_packer_testcase extends advanced_testcase implements file_p
         file_put_contents($subfolder . '/test3.txt', 'and');
         file_put_contents($subfolder . '/test4.txt', 'other');
         file_put_contents($subfolder . '/test5.txt', 'worlds');
+        file_put_contents($subfolder . '/test6.txt', 'and');
+        file_put_contents($subfolder . '/test7.txt', 'dimensions');
         $this->progress = array();
         $result = $packer->archive_to_pathname(array('' => $folder), $archive, true, $this);
         $this->assertTrue($result);
