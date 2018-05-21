@@ -350,44 +350,75 @@ class mod_assign_lib_testcase extends mod_assign_base_testcase {
         $newduedate = $duedate + DAYSECS;
         $this->setAdminUser();
 
-        $assign = $this->create_instance(['duedate' => $duedate]);
-
         // Make sure the calendar event for assignment 1 matches the initial due date.
-        $instance = $assign->get_instance();
-        $eventparams = ['modulename' => 'assign', 'instance' => $instance->id];
+        $course1 = $this->getDataGenerator()->create_course();
+        $assign1 = $this->create_instance(['duedate' => $duedate, 'course' => $course1->id]);
+        $instance1 = $assign1->get_instance();
+
+        $eventparams = [
+            'modulename' => 'assign',
+            'instance' => $instance1->id,
+            'eventtype' => ASSIGN_EVENT_TYPE_DUE,
+            'groupid' => 0,
+            'courseid' => $course1->id
+        ];
         $eventtime = $DB->get_field('event', 'timestart', $eventparams, MUST_EXIST);
         $this->assertEquals($eventtime, $duedate);
 
         // Manually update assignment 1's due date.
-        $DB->update_record('assign', (object)['id' => $instance->id, 'duedate' => $newduedate]);
+        $DB->update_record('assign', (object)[
+            'id' => $instance1->id,
+            'duedate' => $newduedate,
+            'course' => $course1->id
+        ]);
 
         // Then refresh the assignment events of assignment 1's course.
-        $this->assertTrue(assign_refresh_events($this->course->id));
+        $this->assertTrue(assign_refresh_events($course1->id));
 
         // Confirm that the assignment 1's due date event now has the new due date after refresh.
         $eventtime = $DB->get_field('event', 'timestart', $eventparams, MUST_EXIST);
         $this->assertEquals($eventtime, $newduedate);
 
         // Create a second course and assignment.
-        $generator = $this->getDataGenerator();
-        $course2 = $generator->create_course();
+        $course2 = $this->getDataGenerator()->create_course();
         $assign2 = $this->create_instance(['duedate' => $duedate, 'course' => $course2->id]);
         $instance2 = $assign2->get_instance();
 
         // Manually update assignment 1 and 2's due dates.
         $newduedate += DAYSECS;
-        $DB->update_record('assign', (object)['id' => $instance->id, 'duedate' => $newduedate]);
-        $DB->update_record('assign', (object)['id' => $instance2->id, 'duedate' => $newduedate]);
+        $DB->update_record('assign', (object)[
+            'id' => $instance1->id,
+            'duedate' => $newduedate,
+            'course' => $course1->id
+        ]);
+        $DB->update_record('assign', (object)[
+            'id' => $instance2->id,
+            'duedate' => $newduedate,
+            'course' => $course2->id
+        ]);
 
-        // Refresh events of all courses.
+        // Refresh events of all courses and check the calendar events matches the new due date.
         $this->assertTrue(assign_refresh_events());
 
         // Check the due date calendar event for assignment 1.
+        $eventparams = [
+            'modulename' => 'assign',
+            'instance' => $instance1->id,
+            'eventtype' => ASSIGN_EVENT_TYPE_DUE,
+            'groupid' => 0,
+            'courseid' => $course1->id
+        ];
         $eventtime = $DB->get_field('event', 'timestart', $eventparams, MUST_EXIST);
         $this->assertEquals($eventtime, $newduedate);
 
         // Check the due date calendar event for assignment 2.
-        $eventparams['instance'] = $instance2->id;
+        $eventparams = [
+            'modulename' => 'assign',
+            'instance' => $instance2->id,
+            'eventtype' => ASSIGN_EVENT_TYPE_DUE,
+            'groupid' => 0,
+            'courseid' => $course2->id
+        ];
         $eventtime = $DB->get_field('event', 'timestart', $eventparams, MUST_EXIST);
         $this->assertEquals($eventtime, $newduedate);
 

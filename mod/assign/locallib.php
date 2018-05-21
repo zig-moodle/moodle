@@ -1190,9 +1190,30 @@ class assign {
             $select = "modulename = :modulename
                        AND instance = :instance
                        AND eventtype = :eventtype
-                       AND groupid = 0
-                       AND courseid <> 0";
-            $params = array('modulename' => 'assign', 'instance' => $instance->id, 'eventtype' => $eventtype);
+                       AND courseid = :courseid
+                       AND groupid = 0";
+            $params = [
+                'modulename' => 'assign',
+                'instance' => $instance->id,
+                'eventtype' => $eventtype,
+                'courseid' => $event->courseid
+            ];
+
+            // Check if there are multiple assignment due date calendar events from MDL-61870 bug to clean up,
+            // which are caused by having assignment group overrides that are imported without groups.
+            if ($events = $DB->get_records('event', $params, 'id ASC')) {
+                // Remove the first due date event (the original) to isolate the remaining duplicates to clean up.
+                array_shift($events);
+
+                $duplicates = array_map(function($event) {
+                    return $event->id;
+                }, $events);
+
+                if (count($duplicates) > 0) {
+                    $DB->delete_records_list('event', 'id', $duplicates);
+                }
+            }
+
             $event->id = $DB->get_field_select('event', 'id', $select, $params);
 
             // Now process the event.
