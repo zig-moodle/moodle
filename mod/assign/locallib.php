@@ -2582,7 +2582,7 @@ class assign {
      * @return bool true for success
      */
     public function update_grade($grade, $reopenattempt = false) {
-        global $DB;
+        global $CFG, $DB;
 
         $grade->timemodified = time();
 
@@ -2597,9 +2597,11 @@ class assign {
             if ($this->get_instance()->grade > 0) {
                 if (!is_numeric($grade->grade)) {
                     return false;
-                } else if ($grade->grade > $this->get_instance()->grade) {
-                    return false;
                 } else if ($grade->grade < 0) {
+                    return false;
+                } else if ($CFG->unlimitedgrades && ($grade->grade > $CFG->gradepointmax)) {
+                    return false;
+                } else if (!$CFG->unlimitedgrades && ($grade->grade > $this->get_instance()->grade)) {
                     return false;
                 }
             } else {
