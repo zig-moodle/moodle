@@ -551,6 +551,7 @@ $string['unlocksubmissionforstudent'] = 'Allow submissions for student: (id={$a-
 $string['unlocksubmissions'] = 'Unlock submissions';
 $string['unlimitedattempts'] = 'Unlimited';
 $string['unlimitedattemptsallowed'] = 'Unlimited attempts allowed.';
+$string['unlimitedgradeabovegradepointmax'] = 'Unlimited grade must be less than or equal to the grade point maximum {$a}.';
 $string['unlimitedpages'] = 'Unlimited';
 $string['unsavedchanges'] = 'Unsaved changes';
 $string['unsavedchangesquestion'] = 'There are unsaved changes to grades or feedback. Do you want to save the changes and continue?';

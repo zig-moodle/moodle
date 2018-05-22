@@ -2865,6 +2865,60 @@ Anchor link 2:<a title=\"bananas\" href=\"../logo-240x60.gif\">Link text</a>
     }
 
     /**
+     * Testing grading with unlimited grades enabled.
+     */
+    public function test_quickgrading_with_unlimited_grades() {
+        global $CFG;
+
+        // Setup.
+        $CFG->gradepointdefault = 100;
+        $this->editingteachers[0]->ignoresesskey = true;
+        $this->setUser($this->editingteachers[0]);
+
+        $assign = $this->create_instance(array('attemptreopenmethod' => ASSIGN_ATTEMPT_REOPEN_METHOD_MANUAL));
+
+        // Attempt to grade the attempt without unlimited grades, and grade is greater than assign default grade max.
+        // Saving quick grades should be successful, but the grade value saved should be -1.
+        $CFG->unlimitedgrades = 0;
+        $CFG->gradepointmax = 100;
+        $data = array(
+            'grademodified_' . $this->students[0]->id => '',
+            'gradeattempt_' . $this->students[0]->id => '',
+            'quickgrade_' . $this->students[0]->id => '130.0'
+        );
+        $result = $assign->testable_process_save_quick_grades($data);
+        $this->assertEquals(get_string('quickgradingchangessaved', 'assign'), $result);
+        $grade = $assign->get_user_grade($this->students[0]->id, false);
+        $this->assertEquals('-1.00000', $grade->grade);
+
+        // Attempt to grade the attempt with unlimited grades within the gradepointmax limit of 250.
+        // Saving quick grades should be successful, but the grade value saved should match awarded quick grade value.
+        $CFG->unlimitedgrades = 1;
+        $CFG->gradepointmax = 250;
+        $data = array(
+            'grademodified_' . $this->students[1]->id => '',
+            'gradeattempt_' . $this->students[1]->id => '',
+            'quickgrade_' . $this->students[1]->id => '230.0'
+        );
+        $result = $assign->testable_process_save_quick_grades($data);
+        $this->assertEquals(get_string('quickgradingchangessaved', 'assign'), $result);
+        $grade = $assign->get_user_grade($this->students[1]->id, false);
+        $this->assertEquals('230', $grade->grade);
+
+        // Attempt to grade the attempt with unlimited grades beyond the gradepointmax limit of 250.
+        // Saving quick grades should be successful, but the grade value saved should be -1.
+        $data = array(
+            'grademodified_' . $this->students[2]->id => '',
+            'gradeattempt_' . $this->students[2]->id => '',
+            'quickgrade_' . $this->students[2]->id => '256.0'
+        );
+        $result = $assign->testable_process_save_quick_grades($data);
+        $this->assertEquals(get_string('quickgradingchangessaved', 'assign'), $result);
+        $grade = $assign->get_user_grade($this->students[2]->id, false);
+        $this->assertEquals('-1.00000', $grade->grade);
+    }
+
+    /**
      * Test updating activity completion when submitting an assessment.
      */
     public function test_update_activity_completion_records_solitary_submission() {
