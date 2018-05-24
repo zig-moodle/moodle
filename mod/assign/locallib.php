@@ -4133,12 +4133,13 @@ class assign {
         $gradingoptionsform->set_data($gradingoptionsdata);
 
         $actionformtext = $this->get_renderer()->render($gradingactions);
+        $actionformtextdiv = html_writer::div($actionformtext, 'p-t-1');
         $header = new assign_header($this->get_instance(),
                                     $this->get_context(),
                                     false,
                                     $this->get_course_module()->id,
                                     get_string('grading', 'assign'),
-                                    $actionformtext);
+                                    $actionformtextdiv);
         $o .= $this->get_renderer()->render($header);
 
         $currenturl = $CFG->wwwroot .

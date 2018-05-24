@@ -225,9 +225,21 @@ class mod_assign_renderer extends plugin_renderer_base {
         $this->page->set_title(get_string('pluginname', 'assign'));
         $this->page->set_heading($this->page->course->fullname);
 
+        list($course, $cm) = get_course_and_cm_from_cmid($this->page->cm->id, 'assign');
         $o .= $this->output->header();
         $heading = format_string($header->assign->name, false, array('context' => $header->context));
-        $o .= $this->output->heading($heading);
+        $o .= $this->output->heading($heading, 2, (!$cm->visible) ? 'dimmed_text' : '');
+
+        if (!$cm->visible) {
+            // Create a new instance of course renderer to utilise availability_info() function.
+            $page = new moodle_page();
+            $page->set_course($course);
+            $page->set_context($cm);
+            $courserenderer = new core_course_renderer($page, $this->target);
+
+            $o .= $courserenderer->availability_info(get_string('hiddenfromstudents'), 'ishidden');
+        }
+
         if ($header->preface) {
             $o .= $header->preface;
         }
