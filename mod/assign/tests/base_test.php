@@ -314,6 +314,7 @@ class testable_assign extends assign {
     public function testable_view_batch_set_workflow_state($selectedusers) {
         global $PAGE;
         $PAGE->set_url('/mod/assign/view.php');
+        $PAGE->set_cm($this->get_course_module());
         $mform = $this->testable_grading_batch_operations_form('setmarkingworkflowstate', $selectedusers);
         return parent::view_batch_set_workflow_state($mform);
     }
@@ -321,6 +322,7 @@ class testable_assign extends assign {
     public function testable_view_batch_markingallocation($selectedusers) {
         global $PAGE;
         $PAGE->set_url('/mod/assign/view.php');
+        $PAGE->set_cm($this->get_course_module());
         $mform = $this->testable_grading_batch_operations_form('setmarkingallocation', $selectedusers);
         return parent::view_batch_markingallocation($mform);
     }

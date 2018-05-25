@@ -280,6 +280,7 @@ class assign_events_testcase extends mod_assign_base_testcase {
 
         // We need to set the URL in order to view the feedback.
         $PAGE->set_url('/a_url');
+        $PAGE->set_cm($assign->get_course_module());
 
         // Trigger and capture the event.
         $sink = $this->redirectEvents();
@@ -637,6 +638,8 @@ class assign_events_testcase extends mod_assign_base_testcase {
 
         // We need to set the URL in order to view the submission.
         $PAGE->set_url('/a_url');
+        $PAGE->set_cm($assign->get_course_module());
+
         // A hack - these variables are used by the view_plugin_content function to
         // determine what we actually want to view - would usually be set in URL.
         global $_POST;
@@ -685,6 +688,8 @@ class assign_events_testcase extends mod_assign_base_testcase {
 
         // We need to set the URL in order to view the feedback.
         $PAGE->set_url('/a_url');
+        $PAGE->set_cm($assign->get_course_module());
+
         // A hack - these variables are used by the view_plugin_content function to
         // determine what we actually want to view - would usually be set in URL.
         global $_POST;
@@ -727,6 +732,8 @@ class assign_events_testcase extends mod_assign_base_testcase {
 
         // We need to set the URL in order to view the feedback.
         $PAGE->set_url('/a_url');
+        $PAGE->set_cm($assign->get_course_module());
+
         // A hack - this variable is used by the view_single_grade_page function.
         global $_POST;
         $_POST['rownum'] = 1;
@@ -767,6 +774,8 @@ class assign_events_testcase extends mod_assign_base_testcase {
 
         // We need to set the URL in order to view the feedback.
         $PAGE->set_url('/a_url');
+        $PAGE->set_cm($assign->get_course_module());
+
         // A hack - this variable is used by the view_single_grade_page function.
         global $_POST;
         $_POST['rownum'] = 1;
@@ -806,6 +815,7 @@ class assign_events_testcase extends mod_assign_base_testcase {
 
         // We need to set the URL in order to view the submission form.
         $PAGE->set_url('/a_url');
+        $PAGE->set_cm($assign->get_course_module());
 
         // Trigger and capture the event.
         $sink = $this->redirectEvents();
@@ -841,6 +851,7 @@ class assign_events_testcase extends mod_assign_base_testcase {
 
         // We need to set the URL in order to view the submission form.
         $PAGE->set_url('/a_url');
+        $PAGE->set_cm($assign->get_course_module());
 
         // Trigger and capture the event.
         $sink = $this->redirectEvents();
@@ -877,6 +888,7 @@ class assign_events_testcase extends mod_assign_base_testcase {
 
         // We need to set the URL in order to view the submission form.
         $PAGE->set_url('/a_url');
+        $PAGE->set_cm($assign->get_course_module());
 
         // Trigger and capture the event.
         $sink = $this->redirectEvents();
