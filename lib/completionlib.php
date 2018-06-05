@@ -654,6 +654,19 @@ class completion_info {
 
         $newstate = COMPLETION_COMPLETE;
 
+        // Check the {modname}_get_completion_state() function first before checking grade completion.
+        if (plugin_supports('mod', $cm->modname, FEATURE_COMPLETION_HAS_RULES)) {
+            $function = $cm->modname.'_get_completion_state';
+            if (!function_exists($function)) {
+                $this->internal_systemerror("Module {$cm->modname} claims to support
+                    FEATURE_COMPLETION_HAS_RULES but does not have required
+                    {$cm->modname}_get_completion_state function");
+            }
+            if (!$function($this->course, $cm, $userid, COMPLETION_AND)) {
+                return COMPLETION_INCOMPLETE;
+            }
+        }
+
         // Check grade
         if (!is_null($cm->completiongradeitemnumber)) {
             require_once($CFG->libdir.'/gradelib.php');
@@ -671,26 +684,13 @@ class completion_info {
                     $this->internal_systemerror("Unexpected result: multiple grades for
                         item '{$item->id}', user '{$userid}'");
                 }
-                $newstate = self::internal_get_grade_state($item, reset($grades));
-                if ($newstate == COMPLETION_INCOMPLETE) {
-                    return COMPLETION_INCOMPLETE;
+                $gradestate = self::internal_get_grade_state($item, reset($grades));
+                if ($gradestate != COMPLETION_INCOMPLETE) {
+                    $newstate = $gradestate;
                 }
-
             } else {
                 $this->internal_systemerror("Cannot find grade item for '{$cm->modname}'
                     cm '{$cm->id}' matching number '{$cm->completiongradeitemnumber}'");
-            }
-        }
-
-        if (plugin_supports('mod', $cm->modname, FEATURE_COMPLETION_HAS_RULES)) {
-            $function = $cm->modname.'_get_completion_state';
-            if (!function_exists($function)) {
-                $this->internal_systemerror("Module {$cm->modname} claims to support
-                    FEATURE_COMPLETION_HAS_RULES but does not have required
-                    {$cm->modname}_get_completion_state function");
-            }
-            if (!$function($this->course, $cm, $userid, COMPLETION_AND)) {
-                return COMPLETION_INCOMPLETE;
             }
         }
 

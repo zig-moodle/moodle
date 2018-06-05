@@ -677,6 +677,10 @@ class assign {
         if (empty($update->markingworkflow)) { // If marking workflow is disabled, make sure allocation is disabled.
             $update->markingallocation = 0;
         }
+        $update->completionpass = !empty($formdata->completionpass);
+        if (empty($formdata->completionusegrade)) {
+            $update->completionpass = 0;
+        }
 
         $returnid = $DB->insert_record('assign', $update);
         $this->instance = $DB->get_record('assign', array('id'=>$returnid), '*', MUST_EXIST);
@@ -1395,6 +1399,11 @@ class assign {
         $update->grade = $formdata->grade;
         if (!empty($formdata->completionunlocked)) {
             $update->completionsubmit = !empty($formdata->completionsubmit);
+
+            $update->completionpass = !empty($formdata->completionpass);
+            if (empty($formdata->completionusegrade)) {
+                $update->completionpass = 0;
+            }
         }
         $update->teamsubmission = $formdata->teamsubmission;
         $update->requireallteammemberssubmit = $formdata->requireallteammemberssubmit;
@@ -7113,7 +7122,8 @@ class assign {
             $complete = COMPLETION_COMPLETE;
         }
         $completion = new completion_info($this->get_course());
-        if ($completion->is_enabled($this->get_course_module()) && $instance->completionsubmit) {
+        if ($completion->is_enabled($this->get_course_module()) &&
+            ($instance->completionsubmit || $instance->completionpass)) {
             $completion->update_state($this->get_course_module(), $complete, $userid);
         }
 

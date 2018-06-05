@@ -330,17 +330,55 @@ class mod_assign_lib_testcase extends mod_assign_base_testcase {
 
     public function test_assign_get_completion_state() {
         global $DB;
-        $assign = $this->create_instance(array('submissiondrafts' => 0, 'completionsubmit' => 1));
+        $this->setUser($this->teachers[0]);
+        $assign = $this->create_instance([
+            'submissiondrafts' => 0,
+            'completion' => 2,
+            'completionsubmit' => 1
+        ]);
+
+        $cm = $assign->get_course_module();
 
         $this->setUser($this->students[0]);
-        $result = assign_get_completion_state($this->course, $assign->get_course_module(), $this->students[0]->id, false);
+        $result = assign_get_completion_state($this->course, $cm, $this->students[0]->id, false);
         $this->assertFalse($result);
         $submission = $assign->get_user_submission($this->students[0]->id, true);
         $submission->status = ASSIGN_SUBMISSION_STATUS_SUBMITTED;
         $DB->update_record('assign_submission', $submission);
 
-        $result = assign_get_completion_state($this->course, $assign->get_course_module(), $this->students[0]->id, false);
+        $result = assign_get_completion_state($this->course, $cm, $this->students[0]->id, false);
+        $this->assertTrue($result);
 
+        $this->setUser($this->teachers[0]);
+        $assign = $this->create_instance([
+            'submissiondrafts' => 0,
+            'completion' => '2',
+            'completionsubmit' => '1',
+            'completionusegrade' => '1',
+            'completionpass' => '1',
+            'gradepass' => 50
+        ]);
+
+        $cm = $assign->get_course_module();
+
+        $this->setUser($this->students[0]);
+        $submission = $assign->get_user_submission($this->students[0]->id, true);
+        $submission->status = ASSIGN_SUBMISSION_STATUS_SUBMITTED;
+        $DB->update_record('assign_submission', $submission);
+
+        $result = assign_get_completion_state($this->course, $cm, $this->students[0]->id, false);
+        $this->assertTrue($result);
+
+        $this->setUser($this->teachers[0]);
+
+        $data = ['grade' => 50.01];
+        $assign->testable_apply_grade_to_user((object)$data, $this->students[0]->id, 0);
+        $result = assign_get_completion_state($this->course, $cm, $this->students[0]->id, false);
+        $this->assertTrue($result);
+
+        $data = ['grade' => 49.99];
+        $assign->testable_apply_grade_to_user((object)$data, $this->students[0]->id, 1);
+        $result = assign_get_completion_state($this->course, $cm, $this->students[0]->id, false);
         $this->assertTrue($result);
     }
 

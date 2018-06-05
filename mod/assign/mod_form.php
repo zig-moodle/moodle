@@ -249,6 +249,18 @@ class mod_assign_mod_form extends moodleform_mod {
         if ($data['blindmarking'] && $data['attemptreopenmethod'] == ASSIGN_ATTEMPT_REOPEN_METHOD_UNTILPASS) {
             $errors['attemptreopenmethod'] = get_string('reopenuntilpassincompatiblewithblindmarking', 'assign');
         }
+        if (array_key_exists('completion', $data) && $data['completion'] == COMPLETION_TRACKING_AUTOMATIC) {
+            $completionpass = isset($data['completionpass']) ? $data['completionpass'] : $this->current->completionpass;
+
+            // Show an error if require passing grade was selected and the grade to pass was set to 0.
+            if ($completionpass) {
+                if (empty($data['gradepass']) || grade_floatval($data['gradepass']) == 0) {
+                    $errors['completionpassgroup'] = get_string('gradetopassnotset', 'assign');
+                } else if (grade_floatval($data['gradepass']) < 0) {
+                    $errors['completionpassgroup'] = get_string('gradetopassmustbeset', 'assign');
+                }
+            }
+        }
 
         return $errors;
     }
@@ -291,10 +303,19 @@ class mod_assign_mod_form extends moodleform_mod {
     public function add_completion_rules() {
         $mform =& $this->_form;
 
-        $mform->addElement('advcheckbox', 'completionsubmit', '', get_string('completionsubmit', 'assign'));
-        // Enable this completion rule by default.
-        $mform->setDefault('completionsubmit', 1);
-        return array('completionsubmit');
+        $group = [];
+        $group[] = $mform->createElement('advcheckbox', 'completionpass', null, get_string('completionpass', 'assign'),
+            array('group' => 'cpass'));
+        $mform->disabledIf('completionpass', 'completionusegrade', 'notchecked');
+        $mform->addGroup($group, 'completionpassgroup', '', ' &nbsp; ', false);
+
+        $mform->addElement('advcheckbox', 'completionsubmit', get_string('requiresubmission', 'assign'),
+            get_string('completionsubmit', 'assign'));
+
+        return [
+            'completionpassgroup',
+            'completionsubmit'
+        ];
     }
 
     /**
@@ -304,7 +325,7 @@ class mod_assign_mod_form extends moodleform_mod {
      * @return bool
      */
     public function completion_rule_enabled($data) {
-        return !empty($data['completionsubmit']);
+        return !(empty($data['completionsubmit'] && empty($data['completionpass'])));
     }
 
 }

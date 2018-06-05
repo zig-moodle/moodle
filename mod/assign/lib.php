@@ -492,7 +492,7 @@ function assign_get_coursemodule_info($coursemodule) {
     global $CFG, $DB;
 
     $dbparams = array('id'=>$coursemodule->instance);
-    $fields = 'id, name, alwaysshowdescription, allowsubmissionsfromdate, intro, introformat, completionsubmit';
+    $fields = 'id, name, alwaysshowdescription, allowsubmissionsfromdate, intro, introformat, completionsubmit, completionpass';
     if (! $assignment = $DB->get_record('assign', $dbparams, $fields)) {
         return false;
     }
@@ -509,6 +509,7 @@ function assign_get_coursemodule_info($coursemodule) {
     // Populate the custom completion rules as key => value pairs, but only if the completion mode is 'automatic'.
     if ($coursemodule->completion == COMPLETION_TRACKING_AUTOMATIC) {
         $result->customdata['customcompletionrules']['completionsubmit'] = $assignment->completionsubmit;
+        $result->customdata['customcompletionrules']['completionpass'] = $assignment->completionpass;
     }
 
     return $result;
@@ -535,6 +536,12 @@ function mod_assign_get_completion_active_rule_descriptions($cm) {
                     continue;
                 }
                 $descriptions[] = get_string('completionsubmit', 'assign');
+                break;
+            case 'completionpass':
+                if (empty($val)) {
+                    continue;
+                }
+                $descriptions[] = get_string('completionpass', 'assign');
                 break;
             default:
                 break;
@@ -1645,13 +1652,29 @@ function assign_user_outline($course, $user, $coursemodule, $assignment) {
  * @return bool True if completed, false if not, $type if conditions not set.
  */
 function assign_get_completion_state($course, $cm, $userid, $type) {
-    global $CFG, $DB;
+    global $CFG;
     require_once($CFG->dirroot . '/mod/assign/locallib.php');
 
     $assign = new assign(null, $cm, $course);
 
     // If completion option is enabled, evaluate it and return true/false.
-    if ($assign->get_instance()->completionsubmit) {
+    if ($assign->get_instance()->completionpass) {
+        // Default completionstate set to not completed.
+        $completionstate = false;
+
+        // Check if completionsubmit was used in conjuction with completionpass.
+        if ($assign->get_instance()->completionsubmit) {
+            if ($assign->get_instance()->teamsubmission) {
+                $submission = $assign->get_group_submission($userid, 0, false);
+            } else {
+                $submission = $assign->get_user_submission($userid, false);
+            }
+            $completionstate = $submission && $submission->status == ASSIGN_SUBMISSION_STATUS_SUBMITTED;
+        }
+
+        // Check if final grade was awarded.
+        return (isset($assign->get_grade_item()->get_final($userid)->finalgrade)) ? true : $completionstate;
+    } else if ($assign->get_instance()->completionsubmit) {
         if ($assign->get_instance()->teamsubmission) {
             $submission = $assign->get_group_submission($userid, 0, false);
         } else {

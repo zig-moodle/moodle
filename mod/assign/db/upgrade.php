@@ -170,6 +170,19 @@ function xmldb_assign_upgrade($oldversion) {
 
     // Automatically generated Moodle v3.5.0 release upgrade line.
     // Put any upgrade step following this.
+    if ($oldversion < 2018060700) {
+        // Define new fields to be added to assign.
+        $table = new xmldb_table('assign');
+
+        $field = new xmldb_field('completionpass', XMLDB_TYPE_INTEGER, '2', null, true, null, 0, 'completionsubmit');
+        // Conditionally launch add field completionpass.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Quiz savepoint reached.
+        upgrade_mod_savepoint(true, 2018060700, 'assign');
+    }
 
     return true;
 }
