@@ -2042,3 +2042,37 @@ function mod_assign_core_calendar_event_timestart_updated(\calendar_event $event
         $event->trigger();
     }
 }
+
+/**
+ * Callback function 'get_excluded_context_ids_for_course()' that returns an array of contextid values of assignments
+ * for the specified course to exclude in event log reports and loglive reports.
+ *
+ * This callback specifically returns the context id(s) of blind marking assignments that have not been revealed yet.
+ *
+ * @param   int $courseid The course ID.
+ * @return  array
+ */
+function mod_assign_get_excluded_context_ids_for_course($courseid) {
+    global $CFG, $USER;
+
+    require_once($CFG->dirroot . '/mod/assign/locallib.php');
+
+    $excludedcontextids = [];
+
+    // Only return contexts to exclude from view if the user does not have the 'viewblinddetails' capability.
+    $contextcourse = context_course::instance($courseid);
+    $canviewblinddetails = has_capability('mod/assign:viewblinddetails', $contextcourse, $USER->id);
+
+    if (!$canviewblinddetails) {
+        foreach (get_fast_modinfo($courseid)->get_instances_of('assign') as $cm) {
+            $contextmodule = context_module::instance($cm->id);
+            $assignment = new assign($contextmodule, $cm, $cm->course);
+
+            if ($assignment->is_blind_marking()) {
+                $excludedcontextids[] = $contextmodule->id;
+            }
+        }
+    }
+
+    return $excludedcontextids;
+}
