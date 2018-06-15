@@ -438,8 +438,17 @@ class report_log_table_log extends table_sql {
                 $groupid = $this->filterparams->groupid;
             }
 
+            $courseid = $this->filterparams->courseid;
             $joins[] = "courseid = :courseid";
-            $params['courseid'] = $this->filterparams->courseid;
+            $params['courseid'] = $courseid;
+
+            // Get course module contexts that need to be filtered from log reporting.
+            $contextids = $this->get_course_module_contexts_to_hide_associated_log_events($courseid);
+            if (count($contextids) > 0) {
+                list($notinsql, $notinparams) = $DB->get_in_or_equal($contextids, SQL_PARAMS_NAMED, '', false);
+                $joins[] = "( contextid $notinsql )";
+                $params = array_merge($params, $notinparams);
+            }
         }
 
         if (!empty($this->filterparams->siteerrors)) {
@@ -595,5 +604,28 @@ class report_log_table_log extends table_sql {
                 $this->userfullnames[$userid] = false;
             }
         }
+    }
+
+    /**
+     * Helper function to create a list of context ids from plugins that support the
+     * 'get_contexts_to_hide_associated_event_logs()' callback function for exclusion
+     * in the event log report.
+     *
+     * @param   int $courseid The course ID.
+     * @return  array of context id values.
+     */
+    protected function get_course_module_contexts_to_hide_associated_log_events($courseid) {
+        $contextids = [];
+
+        // Get the $plugincontextids from each plugin's callback and add them to $contextids.
+        $pluginswithfunction = get_plugins_with_function("get_contexts_to_hide_associated_event_logs", "lib.php");
+        foreach ($pluginswithfunction as $plugintype => $plugins) {
+            foreach ($plugins as $pluginfunction) {
+                $plugincontextids = $pluginfunction($courseid);
+                $contextids = array_merge($contextids, $plugincontextids);
+            }
+        }
+
+        return $contextids;
     }
 }

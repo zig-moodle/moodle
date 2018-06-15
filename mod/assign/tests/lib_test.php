@@ -1260,4 +1260,79 @@ class mod_assign_lib_testcase extends advanced_testcase {
         // is changed.
         $this->assertNotEmpty($moduleupdatedevents);
     }
+
+    /**
+     * Test to check excluded context ids associated with assignments with
+     * viewblinddetails setting are appropriately returned for the Course.
+     */
+    public function test_mod_assign_get_contexts_to_hide_associated_event_logs() {
+        $this->resetAfterTest();
+
+        $generator = $this->getDataGenerator();
+
+        $this->setAdminUser();
+        $course = $generator->create_course();
+        $coursecontext = context_course::instance($course->id);
+
+        // Assign1 is not using blindmarking - should not be hidden.
+        $assign1 = $this->create_instance($course, [
+            'name' => 'Normal Assignment',
+            'course' => $course->id,
+            'assignsubmission_onlinetext_enabled' => 1,
+            'blindmarking' => 0
+        ]);
+
+        // Assign2 is using blindmarking and not yet revealed identities - should be hidden.
+        $assign2 = $this->create_instance($course, [
+            'name' => 'Blind without Revealing Identities Assignment',
+            'course' => $course->id,
+            'assignsubmission_onlinetext_enabled' => 1,
+            'blindmarking' => 1
+        ]);
+
+        // Assign3 is using blindmarking and has revealed identities - should not be hidden.
+        $assign3 = $this->create_instance($course, [
+            'name' => 'Blind with Revealing Identities Assignment',
+            'course' => $course->id,
+            'assignsubmission_onlinetext_enabled' => 1,
+            'blindmarking' => 1
+        ]);
+        $assign3->reveal_identities();
+
+        // Verify Admin expects an empty exclusion contexts array.
+        $contexts = mod_assign_get_contexts_to_hide_associated_event_logs($course->id);
+        $this->assertCount(0, $contexts);
+
+        // Test Manager role.
+        $manager = $generator->create_and_enrol($course, 'manager');
+        $managerroleid = $generator->create_role();
+        $generator->role_assign($managerroleid, $manager->id, $coursecontext->id);
+        $this->setUser($manager);
+
+        // Verify Manager expects an empty exclusion contexts array when capability is assigned.
+        assign_capability('mod/assign:viewblinddetails', CAP_ALLOW, $managerroleid, $coursecontext, true);
+        $excludedcontexts = mod_assign_get_contexts_to_hide_associated_event_logs($course->id);
+        $this->assertCount(0, $excludedcontexts);
+
+        // Verify Manager expects a non-empty exclusion contexts array when capability is disabled.
+        assign_capability('mod/assign:viewblinddetails', CAP_PROHIBIT, $managerroleid, $coursecontext, true);
+        $excludedcontexts = mod_assign_get_contexts_to_hide_associated_event_logs($course->id);
+        $this->assertCount(1, $excludedcontexts);
+
+        // Test Editing Teacher role.
+        $editingteacher = $generator->create_and_enrol($course, 'editingteacher');
+        $editingteacherroleid = $generator->create_role();
+        $generator->role_assign($editingteacherroleid, $editingteacher->id, $coursecontext->id);
+        $this->setUser($editingteacher);
+
+        // Verify Editing Teacher expects an empty exclusion contexts array when capability is assigned.
+        assign_capability('mod/assign:viewblinddetails', CAP_ALLOW, $editingteacherroleid, $coursecontext, true);
+        $excludedcontexts = mod_assign_get_contexts_to_hide_associated_event_logs($course->id);
+        $this->assertCount(0, $excludedcontexts);
+
+        // Verify Editing Teacher expects a non-empty exclusion contexts array when capability is disabled.
+        assign_capability('mod/assign:viewblinddetails', CAP_PROHIBIT, $editingteacherroleid, $coursecontext, true);
+        $excludedcontexts = mod_assign_get_contexts_to_hide_associated_event_logs($course->id);
+        $this->assertCount(1, $excludedcontexts);
+    }
 }
