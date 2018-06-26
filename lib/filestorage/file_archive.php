@@ -152,7 +152,8 @@ abstract class file_archive implements Iterator {
             }
         }
 
-        $result = preg_replace('/\.\.+/', '', $result);
+        $result = preg_replace('/[\/]+[.\/]{1,}/', '/', $result); // Replace any /../../ with slash.
+        $result = preg_replace('/[.]{2,}(?=(\.[^.]+)$)|[.]{3,}/', '', $result); // Prevent /.../ without mangling ext.
         $result = ltrim($result); // no leading /
 
         if ($result === '.') {
